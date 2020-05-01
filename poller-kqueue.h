@@ -28,7 +28,7 @@ poller_add_read(int pfd, int rfd, enum poller_mode mode)
 		ev.flags = EV_ADD;
 		break;
 	case POLLER_ONESHOT:
-		ev.flags = EV_ADD | EV_ONESHOT;
+		ev.flags = EV_ADD | EV_DISPATCH;
 		break;
 	}
 
@@ -40,7 +40,17 @@ poller_add_read(int pfd, int rfd, enum poller_mode mode)
 static void
 poller_rearm_read(int pfd, int rfd)
 {
-	poller_add_read(pfd, rfd, POLLER_ONESHOT);
+	struct kevent ev;
+	ev.ident = rfd;
+	ev.filter = EVFILT_READ;
+	ev.flags = EV_ENABLE | EV_DISPATCH;
+	ev.fflags = 0;
+	ev.data = 0;
+	ev.udata = 0;
+
+	if (kevent(pfd, &ev, 1, NULL, 0, NULL) < 0) {
+		err(1, "kevent add");
+	}
 }
 
 static int

@@ -30,6 +30,7 @@ poller_add_read(int pfd, int rfd, enum poller_mode mode)
 	}
 
 	if (epoll_ctl(pfd, EPOLL_CTL_ADD, rfd, &ev) < 0) {
+		// EEXIST it should have been EPOLL_CTL_MOD
 		err(1, "epoll add");
 	}
 }
